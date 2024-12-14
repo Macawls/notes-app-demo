@@ -11,9 +11,9 @@ export enum Collections {
 	Mfas = "_mfas",
 	Otps = "_otps",
 	Superusers = "_superusers",
+	Colors = "colors",
 	Comments = "comments",
 	Notes = "notes",
-	NotesView = "notes_view",
 	Users = "users",
 }
 
@@ -88,6 +88,14 @@ export type SuperusersRecord = {
 	verified?: boolean
 }
 
+export type ColorsRecord = {
+	created?: IsoDateString
+	hex?: string
+	id: string
+	name?: string
+	updated?: IsoDateString
+}
+
 export type CommentsRecord = {
 	content?: string
 	created?: IsoDateString
@@ -98,15 +106,11 @@ export type CommentsRecord = {
 }
 
 export type NotesRecord = {
+	color?: RecordIdString
 	content?: string
 	created?: IsoDateString
 	id: string
 	updated?: IsoDateString
-	user?: RecordIdString
-}
-
-export type NotesViewRecord = {
-	id: string
 	user?: RecordIdString
 }
 
@@ -129,9 +133,9 @@ export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRec
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
+export type ColorsResponse<Texpand = unknown> = Required<ColorsRecord> & BaseSystemFields<Texpand>
 export type CommentsResponse<Texpand = unknown> = Required<CommentsRecord> & BaseSystemFields<Texpand>
 export type NotesResponse<Texpand = unknown> = Required<NotesRecord> & BaseSystemFields<Texpand>
-export type NotesViewResponse<Texpand = unknown> = Required<NotesViewRecord> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
@@ -142,9 +146,9 @@ export type CollectionRecords = {
 	_mfas: MfasRecord
 	_otps: OtpsRecord
 	_superusers: SuperusersRecord
+	colors: ColorsRecord
 	comments: CommentsRecord
 	notes: NotesRecord
-	notes_view: NotesViewRecord
 	users: UsersRecord
 }
 
@@ -154,9 +158,9 @@ export type CollectionResponses = {
 	_mfas: MfasResponse
 	_otps: OtpsResponse
 	_superusers: SuperusersResponse
+	colors: ColorsResponse
 	comments: CommentsResponse
 	notes: NotesResponse
-	notes_view: NotesViewResponse
 	users: UsersResponse
 }
 
@@ -169,8 +173,8 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: '_mfas'): RecordService<MfasResponse>
 	collection(idOrName: '_otps'): RecordService<OtpsResponse>
 	collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
+	collection(idOrName: 'colors'): RecordService<ColorsResponse>
 	collection(idOrName: 'comments'): RecordService<CommentsResponse>
 	collection(idOrName: 'notes'): RecordService<NotesResponse>
-	collection(idOrName: 'notes_view'): RecordService<NotesViewResponse>
 	collection(idOrName: 'users'): RecordService<UsersResponse>
 }

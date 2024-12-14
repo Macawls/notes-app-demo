@@ -8,7 +8,7 @@
                     <slot name="description">
                         Securely login with your social account
                     </slot>
-                    <div class="mt-4 flex justify-center">
+                    <div class="mt-4 flex justify-center gap-6">
                         <Button
                             :key="authProvider.name"
                             v-for="authProvider in data?.oauth2.providers"
