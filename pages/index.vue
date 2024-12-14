@@ -12,7 +12,7 @@
     <template v-if="user">
       <Dialog>
         <DialogTrigger as-child>
-          <Button class="fixed bottom-8 right-8 max-w-fit">
+          <Button class="fixed bottom-8 right-8 max-w-fit z-50">
             Create a note!
             <Icon class="size-6" name="hugeicons:quill-write-01" />
           </Button>
@@ -80,7 +80,7 @@
         <template #description>
           Securely login with a social account to add a note!
         </template>
-        <Button class="fixed bottom-8 right-8 max-w-fit">
+        <Button class="fixed bottom-8 right-8 max-w-fit z-50">
           Create a note!
           <Icon class="size-6" name="hugeicons:quill-write-01" />
         </Button>
