@@ -1,20 +1,20 @@
 <template>
   <Sheet>
     <div class="flex gap-2 relative">
-      <div v-if="user">
-        <NuxtLink :to="`profile/${user.id}`">
+      <div v-if="noteUser">
+        <NuxtLink :to="`profile/${noteUser.id}`">
           <Avatar class="h-8 w-8">
             <AvatarImage
-              :src="$pb.files.getURL(user, user.avatar)"
-              :alt="user.name"
+              :src="$pb.files.getURL(noteUser, noteUser.avatar)"
+              :alt="noteUser.name"
             />
-            <AvatarFallback>{{ user.name }}</AvatarFallback>
+            <AvatarFallback>{{ noteUser.name }}</AvatarFallback>
           </Avatar>
         </NuxtLink>
       </div>
       <div class="flex-grow flex-col flex">
         <div class="flex items-center gap-1">
-          <div v-if="user" class="font-medium">{{ user.name }}</div>
+          <div v-if="noteUser" class="font-medium">{{ noteUser.name }}</div>
           <div class="text-xs italic">
             {{ "~ " + $dayjs(created).utc().fromNow() }}
           </div>
@@ -28,16 +28,19 @@
         <div
           class="self-end flex justify-between w-full items-center mt-2 gap-4"
         >
-          <NoteReactions :key="reactionsKey" :note-id="noteId" />
-          <SheetTrigger v-if="user" as-child>
-            <Button
-              @click="() => fetchReactions()"
-              class="max-w-fit h-fit m-0 p-0 translate-y-0.5"
-              variant="ghost"
-            >
-              <Icon class="size-5" name="codicon:reactions" />
-            </Button>
-          </SheetTrigger>
+          <NoteReactions :key="noteId" :note-id="noteId" />
+          <ClientOnly>
+            <SheetTrigger as-child>
+              <Button
+                v-if="noteUser && user && user.id !== noteUser.id"
+                @click="() => fetchReactions()"
+                class="max-w-fit h-fit m-0 p-0 translate-y-0.5"
+                variant="ghost"
+              >
+                <Icon class="size-5" name="codicon:reactions" />
+              </Button>
+            </SheetTrigger>
+          </ClientOnly>
         </div>
       </div>
       <SheetContent side="bottom">
@@ -45,7 +48,7 @@
           <SheetTitle>Pick an Emoji</SheetTitle>
           <SheetDescription>
             <template v-if="reactions">
-              React to {{ user!.name + `'s` }} post with an emoji
+              React to {{ noteUser!.name + `'s` }} note with an emoji
               <div
                 class="flex gap-4 flex-wrap mt-4 justify-center md:justify-start"
               >
@@ -55,7 +58,8 @@
                       :key="reaction.id"
                       type="submit"
                       variant="ghost"
-                      class="flex flex-col items-center justify-center size-24 p-2"
+                      :disabled="hasReactedWithEmoji(reaction.iconify_id)"
+                      class="flex flex-col items-center justify-center size-24 p-2 disabled:grayscale"
                       @click="addReaction(reaction.id)"
                     >
                       <Icon class="size-10" :name="reaction.iconify_id" />
@@ -65,7 +69,7 @@
               </div>
             </template>
             <template v-else>
-              <IconLoader variant="medium" />
+              <IconLoader variant="large" />
             </template>
           </SheetDescription>
         </SheetHeader>
@@ -85,18 +89,28 @@ const props = defineProps<{
   created: string;
 }>();
 
-const reactionsKey = ref(10);
+const { user } = useUser();
 
 const { $pb, $dayjs } = useNuxtApp();
 
-const { data: user, execute: fetchUser } = useLazyAsyncData(
-  `user-${props.userId}`,
-  () => $pb.collection("users").getOne(props.userId)
+const { data: noteUser } = useAsyncData(`user-${props.userId}`, () =>
+  $pb.collection("users").getOne(props.userId)
 );
 
 const { data: reactions, execute: fetchReactions } = useLazyAsyncData(() =>
   $pb.collection("reactions").getFullList()
 );
+
+const noteReactions = computed(() => {
+  const { data } = useNuxtData(`reactions-${props.noteId}`);
+  return (data.value?.reactions as NoteReactions) || undefined;
+});
+
+const hasReactedWithEmoji = (iconifyId: string): boolean => {
+  if (!noteReactions.value) return false;
+  const reaction = noteReactions.value.find((r) => r.iconify_id === iconifyId);
+  return reaction ? reaction.users.includes(user.value.name) : false;
+};
 
 const addReaction = async (id: string) => {
   try {
@@ -105,8 +119,6 @@ const addReaction = async (id: string) => {
       note: props.noteId,
       user: user.value?.id || "",
     });
-
-    reactionsKey.value = reactionsKey.value++; // re-render reactions, unfortunately not optimisic update for now
   } catch (err) {
     toast({
       variant: "destructive",
@@ -116,8 +128,4 @@ const addReaction = async (id: string) => {
     });
   }
 };
-
-onMounted(() => {
-  fetchUser();
-});
 </script>

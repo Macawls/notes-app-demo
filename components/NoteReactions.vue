@@ -9,7 +9,6 @@
         <Icon
           class="inline-block mr-1 text-xl"
           :name="reaction.iconify_id"
-          mode="svg"
         ></Icon>
         <span class="text-sm text-foreground">{{ reaction.users.length }}</span>
       </span>
@@ -18,17 +17,16 @@
 </template>
 
 <script setup lang="ts">
+const { user } = useUser();
+
+const { $pb } = useNuxtApp();
 const { noteId } = defineProps<{
   noteId: string;
 }>();
 
-type NoteReactions = Array<{
-  iconify_id: string;
-  users: string[];
-}>;
-
-const { $pb } = useNuxtApp();
-const { data } = await useAsyncData(() =>
-  $pb.collection("reactions_by_note").getOne(noteId)
+const { data } = await useAsyncData(
+  `reactions-${noteId}`,
+  async () =>
+    (await $pb.collection("reactions_by_note").getOne(noteId)) || undefined
 );
 </script>

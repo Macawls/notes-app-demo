@@ -31,7 +31,8 @@
         <DialogHeader>
           <DialogTitle>Sign in</DialogTitle>
           <DialogDescription
-            >Securely login with your social account</DialogDescription
+            >Share what's on your mind by selecting a social
+            account</DialogDescription
           >
           <Login />
         </DialogHeader>
@@ -91,9 +92,24 @@ onMounted(() => {
       );
     }
   });
+
+  $pb
+    .collection("note_reactions")
+    .subscribe("*", async ({ action, record }) => {
+      if (action === "create") {
+        const { data: noteReactions } = useNuxtData(`reactions-${record.note}`);
+        try {
+          const res = await $pb
+            .collection("reactions_by_note")
+            .getOne(record.note);
+          noteReactions.value = res;
+        } catch (err) {}
+      }
+    });
 });
 
 onUnmounted(() => {
   $pb.collection("notes").unsubscribe("*");
+  $pb.collection("note_reactions").unsubscribe("*");
 });
 </script>
