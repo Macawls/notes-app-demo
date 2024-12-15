@@ -12,8 +12,10 @@ export enum Collections {
 	Otps = "_otps",
 	Superusers = "_superusers",
 	Colors = "colors",
-	Comments = "comments",
+	NoteReactions = "note_reactions",
 	Notes = "notes",
+	Reactions = "reactions",
+	ReactionsByNote = "reactions_by_note",
 	Users = "users",
 }
 
@@ -96,22 +98,35 @@ export type ColorsRecord = {
 	updated?: IsoDateString
 }
 
-export type CommentsRecord = {
-	content?: string
+export type NoteReactionsRecord = {
 	created?: IsoDateString
 	id: string
 	note?: RecordIdString
+	reaction?: RecordIdString
 	updated?: IsoDateString
 	user?: RecordIdString
 }
 
 export type NotesRecord = {
-	color?: RecordIdString
-	content?: string
+	color: RecordIdString
+	content: string
 	created?: IsoDateString
 	id: string
 	updated?: IsoDateString
-	user?: RecordIdString
+	user: RecordIdString
+}
+
+export type ReactionsRecord = {
+	created?: IsoDateString
+	iconify_id?: string
+	id: string
+	name?: string
+	updated?: IsoDateString
+}
+
+export type ReactionsByNoteRecord<Treactions = unknown> = {
+	id: string
+	reactions?: null | Treactions
 }
 
 export type UsersRecord = {
@@ -134,8 +149,10 @@ export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemF
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
 export type ColorsResponse<Texpand = unknown> = Required<ColorsRecord> & BaseSystemFields<Texpand>
-export type CommentsResponse<Texpand = unknown> = Required<CommentsRecord> & BaseSystemFields<Texpand>
+export type NoteReactionsResponse<Texpand = unknown> = Required<NoteReactionsRecord> & BaseSystemFields<Texpand>
 export type NotesResponse<Texpand = unknown> = Required<NotesRecord> & BaseSystemFields<Texpand>
+export type ReactionsResponse<Texpand = unknown> = Required<ReactionsRecord> & BaseSystemFields<Texpand>
+export type ReactionsByNoteResponse<Treactions = unknown, Texpand = unknown> = Required<ReactionsByNoteRecord<Treactions>> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
@@ -147,8 +164,10 @@ export type CollectionRecords = {
 	_otps: OtpsRecord
 	_superusers: SuperusersRecord
 	colors: ColorsRecord
-	comments: CommentsRecord
+	note_reactions: NoteReactionsRecord
 	notes: NotesRecord
+	reactions: ReactionsRecord
+	reactions_by_note: ReactionsByNoteRecord
 	users: UsersRecord
 }
 
@@ -159,8 +178,10 @@ export type CollectionResponses = {
 	_otps: OtpsResponse
 	_superusers: SuperusersResponse
 	colors: ColorsResponse
-	comments: CommentsResponse
+	note_reactions: NoteReactionsResponse
 	notes: NotesResponse
+	reactions: ReactionsResponse
+	reactions_by_note: ReactionsByNoteResponse
 	users: UsersResponse
 }
 
@@ -174,7 +195,9 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: '_otps'): RecordService<OtpsResponse>
 	collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
 	collection(idOrName: 'colors'): RecordService<ColorsResponse>
-	collection(idOrName: 'comments'): RecordService<CommentsResponse>
+	collection(idOrName: 'note_reactions'): RecordService<NoteReactionsResponse>
 	collection(idOrName: 'notes'): RecordService<NotesResponse>
+	collection(idOrName: 'reactions'): RecordService<ReactionsResponse>
+	collection(idOrName: 'reactions_by_note'): RecordService<ReactionsByNoteResponse>
 	collection(idOrName: 'users'): RecordService<UsersResponse>
 }

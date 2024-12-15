@@ -2,11 +2,7 @@ import { type UsersResponse } from "~/types/pocketbase";
 
 export const useUser = () => {
   const { $pb } = useNuxtApp();
-
-  const user = useState<UsersResponse<unknown> | undefined>(
-    "pocketbase-user",
-    () => undefined,
-  );
+  const user = useState<UsersResponse<unknown> | undefined>(() => undefined);
 
   if ($pb.authStore.isValid) {
     user.value = $pb.authStore.record as UsersResponse<unknown>;
