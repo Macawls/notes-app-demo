@@ -1,9 +1,12 @@
+To prevent the content from overflowing the screen, we can add some CSS classes
+to limit the width and add text wrapping. Here's the modified version of your
+component with these improvements:
 <template>
   <Sheet>
-    <div class="flex gap-2 relative">
+    <div class="flex gap-2 relative max-w-full">
       <div v-if="noteUser">
         <NuxtLink :to="`profile/${noteUser.id}`">
-          <Avatar class="h-8 w-8">
+          <Avatar class="h-8 w-8 flex-shrink-0">
             <AvatarImage
               :src="$pb.files.getURL(noteUser, noteUser.avatar)"
               :alt="noteUser.name"
@@ -12,8 +15,8 @@
           </Avatar>
         </NuxtLink>
       </div>
-      <div class="flex-grow flex-col flex">
-        <div class="flex items-center gap-1">
+      <div class="flex-grow flex-col flex overflow-hidden">
+        <div class="flex items-center gap-1 flex-wrap">
           <div v-if="noteUser" class="font-medium">{{ noteUser.name }}</div>
           <div class="text-xs italic">
             {{ "~ " + $dayjs(created).utc().fromNow() }}
@@ -21,7 +24,7 @@
         </div>
         <div
           :style="{ backgroundColor: color }"
-          class="shadow-sm p-3 relative text-black rounded-tr-md rounded-br-md rounded-bl-md"
+          class="shadow-sm p-3 relative text-black rounded-tr-md rounded-br-md rounded-bl-md break-words"
         >
           {{ content }}
         </div>
