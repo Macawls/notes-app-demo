@@ -42,7 +42,11 @@
 </template>
 
 <script setup lang="ts">
-import { type NotesResponse, type ColorsResponse } from "~/types/pocketbase";
+import {
+  type NotesResponse,
+  type ColorsResponse,
+  type ReactionsByNoteResponse,
+} from "~/types/pocketbase";
 
 const { $pb } = useNuxtApp();
 const { user } = useUser();
@@ -96,13 +100,23 @@ onMounted(() => {
   $pb
     .collection("note_reactions")
     .subscribe("*", async ({ action, record }) => {
-      if (action === "create") {
-        const { data: noteReactions } = useNuxtData(`reactions-${record.note}`);
+      if (action === "create" || action === "delete") {
         try {
-          const res = await $pb
-            .collection("reactions_by_note")
+          const result = await $pb
+            .collection<ReactionsByNoteResponse>("reactions_by_note")
             .getOne(record.note);
-          noteReactions.value = res;
+
+          if (result) {
+            // update store
+            const { data } = useNuxtData<ReactionsByNoteData>(
+              `reactions-${record.note}`
+            );
+
+            data.value = {
+              id: result.id,
+              reactions: result.reactions as ReactionData[],
+            };
+          }
         } catch (err) {}
       }
     });

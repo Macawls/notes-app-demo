@@ -1,6 +1,3 @@
-To prevent the content from overflowing the screen, we can add some CSS classes
-to limit the width and add text wrapping. Here's the modified version of your
-component with these improvements:
 <template>
   <Sheet>
     <div class="flex gap-2 relative max-w-full">
@@ -50,12 +47,12 @@ component with these improvements:
         <SheetHeader>
           <SheetTitle>Pick an Emoji</SheetTitle>
           <SheetDescription>
-            <template v-if="reactions">
+            <template v-if="reactionOptions">
               React to {{ noteUser!.name + `'s` }} note with an emoji
               <div
                 class="flex gap-4 flex-wrap mt-4 justify-center md:justify-start"
               >
-                <template v-for="reaction in reactions">
+                <template v-for="reaction in reactionOptions">
                   <SheetClose as-child>
                     <Button
                       :key="reaction.id"
@@ -100,27 +97,42 @@ const { data: noteUser } = useAsyncData(`user-${props.userId}`, () =>
   $pb.collection("users").getOne(props.userId)
 );
 
-const { data: reactions, execute: fetchReactions } = useLazyAsyncData(() =>
-  $pb.collection("reactions").getFullList()
+const { data: reactionOptions, execute: fetchReactions } = useLazyAsyncData(
+  `reactions`,
+  () => $pb.collection("reactions").getFullList()
 );
 
-const noteReactions = computed(() => {
-  const { data } = useNuxtData(`reactions-${props.noteId}`);
-  return (data.value?.reactions as NoteReactions) || undefined;
-});
-
 const hasReactedWithEmoji = (iconifyId: string): boolean => {
-  if (!noteReactions.value) return false;
-  const reaction = noteReactions.value.find((r) => r.iconify_id === iconifyId);
+  const { data } = useNuxtData<ReactionsByNoteData>(
+    `reactions-${props.noteId}`
+  );
+
+  if (!data.value) return false;
+  const reaction = data.value.reactions.find((r) => r.iconify_id === iconifyId);
   return reaction ? reaction.users.includes(user.value.name) : false;
 };
 
+const { emit } = useClientReactionBus();
+
 const addReaction = async (id: string) => {
+  if (!user.value) return;
+  if (!reactionOptions.value) return;
+
+  const reaction = reactionOptions.value.find((e) => e.id === id);
+
+  // optimistic update first
+  if (reaction) {
+    emit({
+      iconify_id: reaction.iconify_id,
+      noteId: props.noteId,
+    });
+  }
+
   try {
     await $pb.collection("note_reactions").create({
       reaction: id,
       note: props.noteId,
-      user: user.value?.id || "",
+      user: user.value.id,
     });
   } catch (err) {
     toast({
@@ -129,6 +141,8 @@ const addReaction = async (id: string) => {
       description: (err as any).message,
       duration: 3000,
     });
+
+    // remove optimisc update
   }
 };
 </script>
