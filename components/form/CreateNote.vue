@@ -84,7 +84,7 @@ const onSubmit = handleSubmit(async (values) => {
       user: $pb.authStore.record!.id,
     });
 
-    useCreateNoteDialog().value = false;
+    useDialogOpen().value = false;
 
     toast({
       title: "Shared note! 🥳",

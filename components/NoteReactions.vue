@@ -4,15 +4,17 @@
       <span
         v-for="reaction in data.reactions"
         :key="reaction.iconify_id"
-        class="inline-flex items-center mr-2"
+        class="inline-flex items-center mr-2 animate-in zoom-in animte-out zoom-out duration-200"
       >
         <Icon
           class="inline-block mr-1 text-xl"
           :name="reaction.iconify_id"
         ></Icon>
-        <span :key="reaction.users.length" class="text-sm text-foreground">{{
-          reaction.users.length
-        }}</span>
+        <span
+          :key="reaction.users.length"
+          class="text-sm text-foreground animate-in zoom-in duration-200"
+          >{{ reaction.users.length }}</span
+        >
       </span>
     </span>
   </div>

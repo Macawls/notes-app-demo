@@ -22,14 +22,18 @@
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <NuxtLink to="/account">Account</NuxtLink>
+        <DropdownMenuItem as-child>
+          <NuxtLink class="hover:cursor-pointer" to="/account"
+            >Account</NuxtLink
+          >
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <NuxtLink to="/notes">My Notes</NuxtLink>
+        <DropdownMenuItem as-child>
+          <NuxtLink class="hover:cursor-pointer" to="/notes">My Notes</NuxtLink>
         </DropdownMenuItem>
         <DialogTrigger as-child>
-          <DropdownMenuItem @click="">Log out</DropdownMenuItem>
+          <DropdownMenuItem class="hover:cursor-pointer" @click=""
+            >Log out</DropdownMenuItem
+          >
         </DialogTrigger>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -42,7 +46,7 @@
         </DialogDescription>
       </DialogHeader>
       <DialogFooter class="gap-4">
-        <Button @click="logout" variant="secondary">Log out</Button>
+        <Button variant="outline" @click="logout">Log out</Button>
         <DialogClose asChild>
           <Button>Cancel</Button>
         </DialogClose>
@@ -65,10 +69,10 @@
       <DialogHeader>
         <DialogTitle>Sign in</DialogTitle>
         <DialogDescription>
-          Login with your social account to access your profile
+          Login with a social account to access your profile
         </DialogDescription>
       </DialogHeader>
-      <Login />
+      <Login class="mt-2" />
     </DialogContent>
   </Dialog>
 </template>

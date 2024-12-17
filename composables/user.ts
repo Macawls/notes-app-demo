@@ -26,5 +26,6 @@ export const useUser = () => {
     user: computed(() => user.value as UsersResponse),
     loginWithOAuth2,
     logout,
+    set: (record: UsersResponse | undefined) => (user.value = record),
   };
 };

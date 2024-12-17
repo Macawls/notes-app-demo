@@ -1,18 +1,23 @@
 <template>
-  <div class="mt-4 flex justify-center gap-6">
-    <template v-if="data">
-      <Button
-        :key="authProvider.name"
-        v-for="authProvider in data?.oauth2.providers"
-        @click="loginWithOAuth2(authProvider.name)"
-        class="w-fit h-fit"
-      >
-        <Icon :name="`mdi:${authProvider.name}`" class="size-16" />
-      </Button>
+  <div class="mx-auto space-x-8 gap-8">
+    <template v-if="providers">
+      <template v-for="provider in providers">
+        <Button
+          :key="provider"
+          v-if="filteredProviders && !filteredProviders.includes(provider)"
+          @click="
+            () => {
+              useDialogOpen().value = false;
+              loginWithOAuth2(provider);
+            }
+          "
+          class="w-fit h-fit p-4"
+        >
+          <Icon :name="iconMap[provider]" class="size-16" />
+        </Button>
+      </template>
     </template>
-    <template v-else>
-      <IconLoader variant="large" />
-    </template>
+    <IconLoader v-else variant="large" />
   </div>
 </template>
 
@@ -21,4 +26,19 @@ const { data } = useLazyAsyncData(() =>
   useNuxtApp().$pb.collection("users").listAuthMethods()
 );
 const { loginWithOAuth2 } = useUser();
+
+const providers = computed(() => {
+  if (!data.value) return undefined;
+  return data.value.oauth2.providers.map((e) => e.name);
+});
+
+defineProps<{
+  filteredProviders?: string[];
+}>();
+
+const iconMap: Record<string, string> = {
+  google: "logos:google-icon",
+  discord: "logos:discord-icon",
+  github: "cib:github",
+};
 </script>

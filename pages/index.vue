@@ -13,14 +13,14 @@
     </div>
     <DialogTrigger as-child>
       <Button class="fixed bottom-8 right-8 max-w-fit z-50">
-        Create a note!
+        Write
         <Icon class="size-6" name="hugeicons:quill-write-01" />
       </Button>
     </DialogTrigger>
     <DialogContent>
       <template v-if="user">
         <DialogHeader>
-          <DialogTitle>Create note</DialogTitle>
+          <DialogTitle>Create Note</DialogTitle>
           <DialogDescription>
             Fill in the form below to share your note with everyone!
           </DialogDescription>
@@ -34,7 +34,7 @@
             >Share what's on your mind by selecting a social
             account</DialogDescription
           >
-          <Login />
+          <Login class="mt-2" />
         </DialogHeader>
       </template>
     </DialogContent>
@@ -51,7 +51,7 @@ import {
 const { $pb } = useNuxtApp();
 const { user } = useUser();
 
-const open = useCreateNoteDialog();
+const open = useDialogOpen();
 
 const { data: colorOptions } = await useAsyncData(() =>
   $pb.collection("colors").getFullList()

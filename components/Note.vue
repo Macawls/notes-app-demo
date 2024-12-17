@@ -2,7 +2,7 @@
   <Sheet>
     <div class="flex gap-2 relative max-w-full">
       <div v-if="noteUser">
-        <NuxtLink :to="`profile/${noteUser.id}`">
+        <NuxtLink :to="`user/${noteUser.id}`">
           <Avatar class="h-8 w-8 flex-shrink-0">
             <AvatarImage
               :src="$pb.files.getURL(noteUser, noteUser.avatar)"

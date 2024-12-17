@@ -1,3 +1,3 @@
-export const useCreateNoteDialog = () => {
+export const useDialogOpen = () => {
   return useState(() => false);
 };

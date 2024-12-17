@@ -14,6 +14,13 @@ export default defineNuxtConfig({
   icon: {
     serverBundle: "remote",
   },
+  // $development: {
+  //   runtimeConfig: {
+  //     public: {
+  //       pocketbase: "http://127.0.0.1:8090/",
+  //     },
+  //   },
+  // },
   colorMode: {
     preference: "system",
     classSuffix: "",
