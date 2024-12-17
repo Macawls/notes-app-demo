@@ -4,7 +4,7 @@
     <div class="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
+          <CardTitle>Edit Profile</CardTitle>
           <CardDescription>Update your information here</CardDescription>
         </CardHeader>
         <CardContent>
