@@ -4,7 +4,7 @@
       <template v-for="provider in providers">
         <Button
           :key="provider"
-          v-if="filteredProviders && !filteredProviders.includes(provider)"
+          v-if="!filteredProviders.includes(provider)"
           @click="
             () => {
               useDialogOpen().value = false;
@@ -32,9 +32,14 @@ const providers = computed(() => {
   return data.value.oauth2.providers.map((e) => e.name);
 });
 
-defineProps<{
-  filteredProviders?: string[];
-}>();
+withDefaults(
+  defineProps<{
+    filteredProviders?: string[];
+  }>(),
+  {
+    filteredProviders: () => [],
+  }
+);
 
 const iconMap: Record<string, string> = {
   google: "logos:google-icon",
