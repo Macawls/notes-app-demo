@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-auto space-x-8 gap-8">
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-flow-row gap-6 mx-auto">
     <template v-if="providers">
       <template v-for="provider in providers">
         <Button
