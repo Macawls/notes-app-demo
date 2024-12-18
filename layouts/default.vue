@@ -1,13 +1,8 @@
 <template>
   <div>
     <Header />
-    <main class="container mx-auto px-4 py-8 max-w-xl">
-      <Suspense>
-        <slot></slot>
-        <template #fallback>
-          <IconLoader variant="large" />
-        </template>
-      </Suspense>
+    <main class="container mx-auto max-w-xl overflow-y-auto py-8">
+      <slot></slot>
     </main>
   </div>
 </template>

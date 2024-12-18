@@ -1,19 +1,25 @@
 <template>
   <Dialog v-model:open="open">
-    <div class="space-y-3">
+    <div
+      ref="notesContainer"
+      class="space-y-2 max-h-[80vh] overflow-y-auto scrollbar-hide"
+    >
       <Note
-        :note-id="note.id"
+        v-for="note in notes?.items"
         :key="note.id"
-        v-for="note in publicNotes"
-        :color="colorOptionsMap[note.color].hex"
+        :note-id="note.id"
+        :color="colorOptionsMap[note.color]?.hex"
         :content="note.content"
         :user-id="note.user"
         :created="note.created"
       />
+      <div v-if="isLoading" class="flex justify-center py-4">
+        <IconLoader variant="medium" />
+      </div>
     </div>
     <DialogTrigger as-child>
       <Button class="fixed bottom-8 right-8 max-w-fit z-50">
-        Write
+        Share Note
         <Icon class="size-6" name="hugeicons:quill-write-01" />
       </Button>
     </DialogTrigger>
@@ -30,10 +36,9 @@
       <template v-else>
         <DialogHeader>
           <DialogTitle>Sign in</DialogTitle>
-          <DialogDescription
-            >Share what's on your mind by selecting a social
-            account</DialogDescription
-          >
+          <DialogDescription>
+            Share what's on your mind by selecting a social account
+          </DialogDescription>
           <Login class="mt-2" />
         </DialogHeader>
       </template>
@@ -42,6 +47,8 @@
 </template>
 
 <script setup lang="ts">
+import { useInfiniteScroll } from "@vueuse/core";
+import type { ListResult } from "pocketbase";
 import {
   type NotesResponse,
   type ColorsResponse,
@@ -50,22 +57,60 @@ import {
 
 const { $pb } = useNuxtApp();
 const { user } = useUser();
-
 const open = useDialogOpen();
-
 const { data: colorOptions } = await useAsyncData(() =>
   $pb.collection("colors").getFullList()
 );
 
-const { data: publicNotes } = await useAsyncData(() =>
-  $pb.collection("notes").getFullList<
-    NotesResponse<{
-      color: ColorsResponse;
-    }>
-  >({
+type NotesWithColor = NotesResponse<{
+  color: ColorsResponse;
+}>;
+
+const notesContainer = ref(null);
+const isLoading = ref(false);
+const hasMore = ref(true);
+const page = ref(1);
+
+const fetchNotes = () =>
+  $pb.collection("notes").getList<NotesWithColor>(page.value, 8, {
     expand: "color",
     sort: "-created",
-  })
+  });
+
+const { data: notes, refresh } =
+  await useAsyncData<ListResult<NotesWithColor> | null>("notes", () =>
+    fetchNotes()
+  );
+
+useInfiniteScroll(
+  notesContainer,
+  async () => {
+    if (!hasMore.value || isLoading.value) return;
+    isLoading.value = true;
+
+    try {
+      page.value++;
+      const res = await fetchNotes();
+
+      notes.value = notes.value
+        ? {
+            ...notes.value,
+            items: [...notes.value.items, ...res.items],
+            totalItems: res.totalItems,
+            totalPages: res.totalPages,
+            page: res.page,
+          }
+        : res;
+
+      hasMore.value = res.totalItems > (notes.value?.items.length ?? 0);
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      page.value--;
+    } finally {
+      isLoading.value = false;
+    }
+  },
+  { distance: 20 }
 );
 
 const colorOptionsMap = computed(() => {
@@ -77,12 +122,12 @@ const colorOptionsMap = computed(() => {
       }, {} as Record<string, ColorsResponse>);
 });
 
-onMounted(() => {
+onMounted(async () => {
   $pb.collection("notes").subscribe("*", ({ action, record }) => {
-    if (!publicNotes.value) return;
+    if (!notes.value) return;
 
     if (action === "create") {
-      publicNotes.value.unshift({
+      notes.value.items.unshift({
         ...record,
         expand: {
           color: colorOptionsMap.value[record.color],
@@ -91,7 +136,7 @@ onMounted(() => {
     }
 
     if (action === "delete") {
-      publicNotes.value = publicNotes.value.filter(
+      notes.value.items = notes.value.items.filter(
         (note) => note.id !== record.id
       );
     }
@@ -100,6 +145,8 @@ onMounted(() => {
   $pb
     .collection("note_reactions")
     .subscribe("*", async ({ action, record }) => {
+      if (!notes.value) return;
+
       if (action === "create" || action === "delete") {
         try {
           const result = await $pb
@@ -112,12 +159,16 @@ onMounted(() => {
               `reactions-${record.note}`
             );
 
-            data.value = {
-              id: result.id,
-              reactions: result.reactions as ReactionData[],
-            };
+            if (data.value) {
+              data.value = {
+                id: result.id,
+                reactions: result.reactions as ReactionData[],
+              };
+            }
           }
-        } catch (err) {}
+        } catch (err) {
+          console.error("Error updating reactions:", err);
+        }
       }
     });
 });

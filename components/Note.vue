@@ -1,6 +1,8 @@
 <template>
   <Sheet>
-    <div class="flex gap-2 relative max-w-full">
+    <div
+      class="flex gap-2 relative max-w-full animate-in fade-in duration-500 slide-in-from-bottom-8"
+    >
       <div v-if="noteUser">
         <NuxtLink :to="`user/${noteUser.id}`">
           <Avatar class="h-8 w-8 flex-shrink-0">
@@ -12,7 +14,7 @@
           </Avatar>
         </NuxtLink>
       </div>
-      <div class="flex-grow flex-col flex overflow-hidden">
+      <div class="flex-grow flex flex-col overflow-hidden">
         <div class="flex items-center gap-1 flex-wrap">
           <div v-if="noteUser" class="font-medium">{{ noteUser.name }}</div>
           <div class="text-xs italic">
@@ -25,20 +27,23 @@
         >
           {{ content }}
         </div>
-        <div
-          class="self-end flex justify-between w-full items-center mt-2 gap-4"
-        >
+        <div class="flex justify-between w-full items-center mt-2 gap-4">
           <NoteReactions :key="noteId" :note-id="noteId" />
           <ClientOnly>
             <SheetTrigger as-child>
-              <Button
-                v-if="noteUser && user && user.id !== noteUser.id"
-                @click="() => fetchReactions()"
-                class="max-w-fit h-fit m-0 p-0 translate-y-0.5"
-                variant="ghost"
-              >
-                <Icon class="size-5" name="codicon:reactions" />
-              </Button>
+              <div class="h-8 w-8 flex items-center justify-center">
+                <!-- Fixed height container for visual consistency -->
+                <Button
+                  v-if="noteUser && user && user.id !== noteUser.id"
+                  @click="() => fetchReactions()"
+                  class="h-8 w-8 p-0 flex items-center justify-center"
+                  variant="ghost"
+                >
+                  <Icon class="h-5 w-5" name="codicon:reactions" />
+                </Button>
+                <!-- When not visible, still occupy space with the same height -->
+                <div v-else class="h-8 w-8" />
+              </div>
             </SheetTrigger>
           </ClientOnly>
         </div>
@@ -49,8 +54,24 @@
           <SheetDescription>
             <template v-if="reactionOptions">
               React to {{ noteUser!.name + `'s` }} note with an emoji
+              <div class="flex gap-4 my-8">
+                <img
+                  class="rounded-full shadow-md object-cover size-14"
+                  v-if="noteUser"
+                  :src="$pb.files.getURL(noteUser, noteUser.avatar)"
+                  :alt="noteUser.name"
+                />
+                <div class="flex flex-col overflow-hidden max-w-md">
+                  <div
+                    :style="{ backgroundColor: color }"
+                    class="shadow-sm p-3 relative text-black rounded-md break-words text-base"
+                  >
+                    {{ content }}
+                  </div>
+                </div>
+              </div>
               <div
-                class="flex gap-4 flex-wrap mt-4 justify-center md:justify-start"
+                class="grid gap-6 grid-cols-3 sm:grid-cols-4 md:flex md:flex-row w-fit"
               >
                 <template v-for="reaction in reactionOptions">
                   <SheetClose as-child>
@@ -59,10 +80,10 @@
                       type="submit"
                       variant="ghost"
                       :disabled="hasReactedWithEmoji(reaction.iconify_id)"
-                      class="flex flex-col items-center justify-center size-24 p-2 disabled:grayscale"
+                      class="flex flex-col items-center justify-center h-24 w-24 p-2 disabled:grayscale"
                       @click="addReaction(reaction.id)"
                     >
-                      <Icon class="size-10" :name="reaction.iconify_id" />
+                      <Icon class="h-10 w-10" :name="reaction.iconify_id" />
                     </Button>
                   </SheetClose>
                 </template>
@@ -125,6 +146,7 @@ const addReaction = async (id: string) => {
     emit({
       iconify_id: reaction.iconify_id,
       noteId: props.noteId,
+      type: "added",
     });
   }
 
@@ -142,7 +164,14 @@ const addReaction = async (id: string) => {
       duration: 3000,
     });
 
-    // remove optimisc update
+    // Remove if failed
+    if (reaction) {
+      emit({
+        iconify_id: reaction.iconify_id,
+        noteId: props.noteId,
+        type: "removed",
+      });
+    }
   }
 };
 </script>

@@ -1,24 +1,24 @@
 <template>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-flow-row gap-6 mx-auto">
-    <template v-if="providers">
-      <template v-for="provider in providers">
-        <Button
-          :key="provider"
-          v-if="!filteredProviders.includes(provider)"
-          @click="
-            () => {
-              useDialogOpen().value = false;
-              loginWithOAuth2(provider);
-            }
-          "
-          class="w-fit h-fit p-4"
-        >
-          <Icon :name="iconMap[provider]" class="size-16" />
-        </Button>
-      </template>
-    </template>
-    <IconLoader v-else variant="large" />
+  <div
+    v-if="providers"
+    class="gap-8 justify-center items-center mx-auto"
+    :class="[providers.length === 1 ? 'flex' : 'grid grid-cols-2 md:flex']"
+  >
+    <Button
+      v-for="provider in providers"
+      :key="provider"
+      @click="
+        () => {
+          useDialogOpen().value = false;
+          loginWithOAuth2(provider);
+        }
+      "
+      class="w-fit h-fit p-4"
+    >
+      <Icon :name="providerIconMap[provider]" class="size-16" />
+    </Button>
   </div>
+  <IconLoader class="mx-auto" v-else variant="large" />
 </template>
 
 <script setup lang="ts">
@@ -27,23 +27,21 @@ const { data } = useLazyAsyncData(() =>
 );
 const { loginWithOAuth2 } = useUser();
 
-const providers = computed(() => {
-  if (!data.value) return undefined;
-  return data.value.oauth2.providers.map((e) => e.name);
-});
+const { providerIconMap } = useAppConfig();
 
-withDefaults(
+const { exclusionList } = withDefaults(
   defineProps<{
-    filteredProviders?: string[];
+    exclusionList?: string[];
   }>(),
   {
-    filteredProviders: () => [],
+    exclusionList: () => [],
   }
 );
 
-const iconMap: Record<string, string> = {
-  google: "logos:google-icon",
-  discord: "logos:discord-icon",
-  github: "cib:github",
-};
+const providers = computed(() => {
+  if (!data.value) return undefined;
+  return data.value.oauth2.providers
+    .map((e) => e.name)
+    .filter((provider) => !exclusionList.includes(provider));
+});
 </script>

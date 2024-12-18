@@ -84,10 +84,17 @@
             <div
               v-for="auth in userExternalAuths"
               :key="auth.provider"
-              class="flex items-center space-x-2 justify-center border-border border-2 p-3 rounded-lg bg-white"
+              class="flex items-center space-x-2 justify-center border-border border-2 p-3 rounded-lg"
             >
-              <Icon :name="`logos:${auth.provider}-icon`" class="size-6" />
-              <span class="text-xs capitalize">{{ auth.provider }}</span>
+              <Icon :name="providerIconMap[auth.provider]" class="size-6" />
+              <span class="text-xs capitalize pr-2">{{ auth.provider }}</span>
+              <Button
+                @click="removeProvider(auth.id)"
+                :disabled="removingProvider"
+                variant="destructive"
+                v-if="canRemoveProviders"
+                >Remove
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -103,7 +110,7 @@
                   Add a login to your account
                 </DialogDescription>
               </DialogHeader>
-              <Login :filtered-providers="filteredProviders" />
+              <Login :exclusion-list="excludedProviders" />
               <DialogFooter class="text-muted-foreground">
                 <div class="p-4 border-border border rounded-lg">
                   <strong>Note</strong>
@@ -164,6 +171,7 @@ import { useUserInfoSchema } from "~/composables/schemas";
 import { useForm } from "vee-validate";
 import { toast } from "~/components/ui/toast";
 import { computedAsync } from "@vueuse/core";
+import { type ExternalauthsResponse } from "~/types/pocketbase";
 
 const { user, set } = useUser();
 const { $pb } = useNuxtApp();
@@ -184,16 +192,21 @@ watch(user, async () => {
   }
 });
 
+const { providerIconMap } = useAppConfig();
+
 const open = useDialogOpen();
 
 const authMethods = computedAsync(async () => {
   return await $pb.collection("users").listAuthMethods();
 });
 
-const userExternalAuths = computedAsync(async () => {
-  // to trigger refetch
-  if (!user.value) return undefined;
-  return await $pb.collection("_externalAuths").getFullList();
+const { data: userExternalAuths, refresh: refreshAuths } = useAsyncData(
+  "user-external-auths",
+  () => $pb.collection("_externalAuths").getFullList()
+);
+
+watch(user, (val) => {
+  if (val) refreshAuths();
 });
 
 const canAddLogin = computed(() => {
@@ -203,12 +216,17 @@ const canAddLogin = computed(() => {
   );
 });
 
-const filteredProviders = computed(() => {
+const excludedProviders = computed(() => {
   if (!userExternalAuths.value || !authMethods.value) return undefined;
   const providers = authMethods.value.oauth2.providers.map((e) => e.name);
   return userExternalAuths.value
     .filter((e) => providers.includes(e.provider))
     .map((e) => e.provider);
+});
+
+const canRemoveProviders = computed(() => {
+  if (!userExternalAuths.value) return;
+  return userExternalAuths.value.length > 1;
 });
 
 const userInfoSchema = useUserInfoSchema();
@@ -276,6 +294,30 @@ const deleteAccount = async () => {
     });
   } finally {
     deleting.value = false;
+  }
+};
+
+const removingProvider = ref(false);
+
+const removeProvider = async (id: string) => {
+  const deletedProvider = userExternalAuths.value!.find((e) => e.id === id)!;
+  const { data } = useNuxtData<ExternalauthsResponse[]>("user-external-auths");
+
+  try {
+    removingProvider.value = true;
+    await $pb.collection("_externalAuths").delete(id);
+
+    data.value = data.value!.filter((e) => e.id !== id);
+  } catch (err) {
+    data.value = [...data.value!, deletedProvider];
+    toast({
+      variant: "destructive",
+      title: `${(err as any).status} Error`,
+      description: (err as any).message,
+      duration: 3000,
+    });
+  } finally {
+    removingProvider.value = false;
   }
 };
 </script>

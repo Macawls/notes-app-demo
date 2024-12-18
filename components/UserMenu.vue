@@ -27,9 +27,6 @@
             >Account</NuxtLink
           >
         </DropdownMenuItem>
-        <DropdownMenuItem as-child>
-          <NuxtLink class="hover:cursor-pointer" to="/notes">My Notes</NuxtLink>
-        </DropdownMenuItem>
         <DialogTrigger as-child>
           <DropdownMenuItem class="hover:cursor-pointer" @click=""
             >Log out</DropdownMenuItem
