@@ -28,7 +28,7 @@
         <DialogHeader>
           <DialogTitle>Create Note</DialogTitle>
           <DialogDescription>
-            Fill in the form below to share your note with everyone!
+            Share your note with everyone!
           </DialogDescription>
         </DialogHeader>
         <FormCreateNote v-if="colorOptions" :colors="colorOptions" />
@@ -58,7 +58,7 @@ import {
 const { $pb } = useNuxtApp();
 const { user } = useUser();
 const open = useDialogOpen();
-const { data: colorOptions } = await useAsyncData(() =>
+const { data: colorOptions } = await useLazyAsyncData(() =>
   $pb.collection("colors").getFullList()
 );
 
@@ -78,7 +78,7 @@ const fetchNotes = () =>
   });
 
 const { data: notes, refresh } =
-  await useAsyncData<ListResult<NotesWithColor> | null>("notes", () =>
+  await useLazyAsyncData<ListResult<NotesWithColor> | null>("notes", () =>
     fetchNotes()
   );
 

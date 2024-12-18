@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header />
-    <main class="container mx-auto max-w-xl overflow-y-auto py-8">
+    <main class="mx-auto max-w-xl px-4 overflow-y-auto py-8">
       <slot></slot>
     </main>
   </div>

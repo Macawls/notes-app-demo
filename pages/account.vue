@@ -1,6 +1,11 @@
 <template>
   <div class="mx-auto">
-    <h1 class="text-4xl font-bold text-foreground mb-8">Account Settings</h1>
+    <h1 class="text-4xl font-bold text-foreground mb-8 flex items-center">
+      <NuxtLink class="inline-block mr-4" to="/">
+        <Icon name="material-symbols:arrow-back-rounded"></Icon>
+      </NuxtLink>
+      Account Settings
+    </h1>
     <div class="space-y-8">
       <Card>
         <CardHeader>

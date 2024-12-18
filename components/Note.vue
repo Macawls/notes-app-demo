@@ -1,11 +1,11 @@
 <template>
   <Sheet>
     <div
-      class="flex gap-2 relative max-w-full animate-in fade-in duration-500 slide-in-from-bottom-8"
+      class="flex gap-3 relative max-w-full animate-in fade-in duration-500 slide-in-from-bottom-8"
     >
       <div v-if="noteUser">
         <NuxtLink :to="`user/${noteUser.id}`">
-          <Avatar class="h-8 w-8 flex-shrink-0">
+          <Avatar class="size-9 flex-shrink-0">
             <AvatarImage
               :src="$pb.files.getURL(noteUser, noteUser.avatar)"
               :alt="noteUser.name"
@@ -32,17 +32,14 @@
           <ClientOnly>
             <SheetTrigger as-child>
               <div class="h-8 w-8 flex items-center justify-center">
-                <!-- Fixed height container for visual consistency -->
                 <Button
-                  v-if="noteUser && user && user.id !== noteUser.id"
                   @click="() => fetchReactions()"
-                  class="h-8 w-8 p-0 flex items-center justify-center"
+                  class="h-8 w-8 p-0 flex items-center justify-center disabled:text-transparent"
+                  :disabled="!(noteUser && user && user.id !== noteUser.id)"
                   variant="ghost"
                 >
                   <Icon class="h-5 w-5" name="codicon:reactions" />
                 </Button>
-                <!-- When not visible, still occupy space with the same height -->
-                <div v-else class="h-8 w-8" />
               </div>
             </SheetTrigger>
           </ClientOnly>

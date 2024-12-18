@@ -1,23 +1,21 @@
 <template>
-  <div class="inline-block">
-    <span v-if="data">
+  <span v-if="data">
+    <span
+      v-for="reaction in reactions"
+      :key="reaction.iconify_id"
+      class="inline-flex items-center mr-2 animate-in zoom-in duration-300"
+    >
+      <Icon
+        class="inline-block mr-1 text-xl"
+        :name="reaction.iconify_id"
+      ></Icon>
       <span
-        v-for="reaction in data.reactions"
-        :key="reaction.iconify_id"
-        class="inline-flex items-center mr-2 animate-in zoom-in animate-out zoom-out duration-200"
+        :key="reaction.users.length"
+        class="text-sm text-foreground animate-in zoom-in duration-200"
+        >{{ reaction.users.length }}</span
       >
-        <Icon
-          class="inline-block mr-1 text-xl"
-          :name="reaction.iconify_id"
-        ></Icon>
-        <span
-          :key="reaction.users.length"
-          class="text-sm text-foreground animate-in zoom-in duration-200"
-          >{{ reaction.users.length }}</span
-        >
-      </span>
     </span>
-  </div>
+  </span>
 </template>
 
 <script setup lang="ts">
@@ -35,6 +33,13 @@ const { data } = await useAsyncData<ReactionsByNoteData>(
     pick: ["id", "reactions"],
   }
 );
+
+const reactions = computed(() => {
+  if (!data.value) return undefined;
+  return data.value?.reactions.sort((a, b) =>
+    a.iconify_id.localeCompare(b.iconify_id)
+  );
+});
 
 const { on } = useClientReactionBus();
 
