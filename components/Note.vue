@@ -31,7 +31,7 @@
           <NoteReactions :key="noteId" :note-id="noteId" />
           <ClientOnly>
             <SheetTrigger as-child>
-              <div class="h-8 w-8 flex items-center justify-center">
+              <div class="h-8 w-8 flex items-center justify-center ml-auto">
                 <Button
                   @click="() => fetchReactions()"
                   class="h-8 w-8 p-0 flex items-center justify-center disabled:text-transparent"
